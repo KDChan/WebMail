@@ -174,4 +174,4 @@ DB의 경우 Intellij database 연결 기능을 이용하여 ip, id, password를
 메일 서버는 java mail api를 이용하여 ip, id, password를 통해 접속
 
 ### 웹 메일 사용 테스트
-구현된 기능 정상 작동 
+구현된 기능 정상 작동 테스트 결과 모든 기능이 정상적으로 작동함
