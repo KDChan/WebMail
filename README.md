@@ -51,7 +51,8 @@ front-end 부분은 html과 간단한 java script를 사용하여 각종 기능�
 
   회원 정보 기입 후 회원 가입을 진행하면 DB에 해당 정보 저장.
   
-  회원가입 시 메일 서버에 저장되는 password encoder와 웹에서 사용하는 password encoder의 형식이 조금 달라 DB에 저장할 때 2가지의 encoder를 사용하여 각각 
+  회원가입 시 메일 서버에 저장되는 password encoder와 웹에서 사용하는 password encoder의 형식이 다르기 때문에
+  DB에 저장할 때 2가지의 encoder를 사용하여 각각 
   
   !중복 아이디와 비밀번호 재입력을 확인하여 예외처리
   
