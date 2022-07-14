@@ -63,7 +63,7 @@ front-end 부분은 html과 간단한 java script를 사용하여 각종 기능�
   
   로그인 실패 시 경고창과 함께 원래 페이지로 이동
   
-  !로그인 success / fail handler를 이용하여 예외 처리
+  !login success / fail handler를 이용하여 예외 처리
 
 
 - 회원 목록 확인
