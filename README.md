@@ -11,6 +11,7 @@
 4. html
 5. java script
 6. mysql
+7. hmailserver (window mail server)
 
 ## 개발 환경
 
