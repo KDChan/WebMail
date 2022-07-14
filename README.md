@@ -43,7 +43,9 @@
 
 DB와 연결되는 모든 부분은 Jpa Repository를 사용함
 
-front-end 부분은 html과 간단한 java script를 사용하여 각종 기능을 테스트 할 수 있도록 구현함
+api 설계 (restcontoller 사용을 위한 기본 틀 결정)
+
+front-end 부분은 html과 간단한 java script를 사용하여 각종 기능 테스트 환경을 구현함
 
 #### 1. 로그인 서비스
 
