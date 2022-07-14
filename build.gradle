@@ -1,0 +1,58 @@
+plugins {
+	id 'org.springframework.boot' version '2.5.6'
+	id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+	id 'java'
+	id 'war'
+
+}
+
+group = 'MailDBweb'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+	mavenCentral()
+}
+
+//bootWar{
+//	archiveBaseName = 'ROOT'
+//	archiveFileName = 'ROOT.war'
+//	archiveVersion = "0.0.0"
+//}
+
+
+dependencies {
+//	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+
+	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf:2.5.5'
+	implementation 'org.springframework.boot:spring-boot-starter-web:2.5.5'
+	implementation 'org.springframework.boot:spring-boot-starter-mail:2.5.5'
+	implementation 'org.springframework.boot:spring-boot-starter-security:2.5.5'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa:2.5.5'
+	implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity5:3.0.4.RELEASE'
+	implementation 'org.springframework.boot:spring-boot-configuration-processor:2.5.5'
+	implementation 'org.projectlombok:lombok:1.18.22'
+	annotationProcessor 'org.projectlombok:lombok:1.18.22'
+	implementation 'org.projectlombok:lombok:1.18.22'
+	implementation 'org.springframework.boot:spring-boot-starter-validation:2.5.5'
+	runtimeOnly 'org.springframework.boot:spring-boot-devtools:2.5.5' //war 빌드 시 주석처리
+	runtimeOnly 'com.microsoft.sqlserver:mssql-jdbc:10.2.0.jre17'
+	compileOnly 'org.webjars:bootstrap:5.1.1'
+	runtimeOnly 'mysql:mysql-connector-java:8.0.28'
+	compileOnly 'org.webjars:jquery:3.6.0'
+
+	//war빌드
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	providedCompile 'org.apache.tomcat.embed:tomcat-embed-jasper'
+	implementation 'javax.servlet:jstl:1.2'
+
+//	providedRuntime 'org.springframework.boot:spring-boot-starter-tomcat'
+
+	testImplementation ('org.springframework.boot:spring-boot-starter-test:2.6.7') {
+		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+	}
+}
+
+test {
+	useJUnitPlatform()
+}
