@@ -1,0 +1,900 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.w3.org/1999/xhtml" lang="ko" xml:lang="ko">
+
+<head>
+    <title>email</title>
+    <!--    <script type="text/javascript" src="./SmartEditor2/js/HuskyEZCreator.js" charset="utf-8"></script>-->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+</head>
+
+<style>
+    div.top {
+        height: 100px;
+        margin: 10px;
+        padding: 5px;
+        background: bisque;
+        text-align: center;
+    }
+
+    div.sidebar {
+        width: 15%;
+        margin: 10px;
+        float: left;
+        text-align: center;
+        background: bisque;
+    }
+
+    div.content {
+        width: 81%;
+        height: 700px;
+        margin: 10px;
+        float: right;
+        background: bisque;
+        overflow: auto;
+    }
+
+    button.root {
+        background: bisque;
+        text-align: center;
+        text-decoration: none;
+        font-size: 15px;
+        margin: 4px;
+        cursor: pointer;
+    }
+
+    div.mail-content {
+        margin: 15px;
+    }
+</style>
+
+<body>
+
+<div>
+    <div class="top">
+        <h1 th:if="${mode} == 'ALL'">전체 메일함</h1>
+        <h1 th:if="${mode} == 'notread'">안읽은 메일함</h1>
+        <h1 th:if="${mode} == 'SENT'">보낸 메일함</h1>
+        <h1 th:if="${mode} == 'INBOX'">받은 메일함</h1>
+        <h1 th:if="${mode} == 'send'">메일 보내기</h1>
+        <h1 th:if="${mode} == 'TEMPORARY'">임시 보관함</h1>
+        <h1 th:if="${mode} == 'WASTE'">휴지통</h1>
+        <h1 th:if="${mode} == 'SPAM'">스팸 메일함</h1>
+        <h1 th:if="${mode} == 'IMPORTANT'">중요 메일함</h1>
+        <h1 th:if="${mode} == 'readmail'">메일 상세보기</h1>
+    </div>
+    <div class="sidebar">
+        <p>
+            <button class="root" th:onclick="'location.href = \'/mail/all\''" name="all">전체 메일함</button>
+        </p>
+        <p>
+            <button class="root" th:onclick="'location.href = \'/mail/notread\''" name="notread">안읽은 메일함</button>
+        </p>
+        <p>
+            <button class="root" th:onclick="'location.href = \'/mail/send\''" name="send">메일보내기</button>
+        </p>
+        <p>
+            <button class="root" th:onclick="'location.href = \'/mail/sent\''" name="sent">보낸 메일함</button>
+        </p>
+        <p>
+            <button class="root" th:onclick="'location.href = \'/mail/receive\''" name="receive">받은 메일함</button>
+        </p>
+        <p>
+            <button class="root" th:onclick="'location.href = \'/mail/temp\''" name="temp">임시 보관함</button>
+        </p>
+        <p>
+            <button class="root" th:onclick="'location.href = \'/mail/important\''" name="important">중요 메일함</button>
+        </p>
+        <p>
+            <button class="root" th:onclick="'location.href = \'/mail/spam\''" name="spam">스팸 메일함</button>
+        </p>
+        <p>
+            <button class="root" th:onclick="'location.href = \'/mail/waste/waste\''" name="waste">휴지통</button>
+            <button class="root" th:onclick="'location.href = \'/mail/waste/clean\''">비우기</button>
+        </p>
+        <p>
+            <button class="root" th:onclick="'location.href = \'/spamlist\''" name="spamlist">스팸 리스트</button>
+        </p>
+
+    </div>
+    <div class="content" th:if="${mode} == 'ALL'">
+        <form th:action="@{/mail}" method="post">
+            <p>
+                <input type="checkbox" value="select_all" onclick="selectAll(this)">전체 선택
+                <button type="submit" class="submit" name="delete" onclick="return confirm('삭제하시겠습니까?')" th:value="삭제">삭제</button>
+                <select name="target">
+                    <option value="INBOX">받은 메일함</option>
+                    <option value="SENT">보낸 메일함</option>
+                    <option value="SPAM">스팸 메일함</option>
+                    <option value="WASTE">휴지통</option>
+                </select>
+                <button type="submit" class="submit" name="move" th:value="이동">이동</button>
+
+                <button type="submit" class="submit" name="read" th:value="읽음">읽음</button>
+
+                <button type="button" onclick='getCheckboxValue("reply")'>답장</button>
+
+                <button type="button" onclick='getCheckboxValue("forward")'>전달</button>
+            </p>
+
+            <script type="text/javascript">
+                function selectAll(selectAll) {
+                    const checkboxes
+                        = document.querySelectorAll('input[type="checkbox"]');
+
+                    checkboxes.forEach((checkbox) => {
+                        checkbox.checked = selectAll.checked
+                    })
+                }
+
+                function getCheckboxValue(val){
+                    const selected = document.querySelectorAll('input[name="uid"]:checked');
+
+                    if (selected.length>1){
+                        alert("하나의 항목만 체크 가능합니다.")
+                    } else if(1 > selected.length){
+                        alert("선택된 항목이 없습니다.")
+                    } else {
+                        let result = '';
+                        if (val === "reply") {
+                            selected.forEach((check) => {
+                                result = '/mail/send/reply/' + check.value;
+                            });
+                        } else if(val === "forward"){
+                            selected.forEach((check) => {
+                                result = '/mail/send/forward/' + check.value;
+                            });
+                        }
+
+                        location.href = result;
+                    }
+                }
+            </script>
+
+            <div class="mail-content">
+                <table th:each="readVo : ${readVo}">
+                    <tr>
+                        <td><input type="checkbox" name="uid" th:value="${readVo.uid}"/></td>
+                        <td width=50 th:if="${readVo.important} == true">
+                            <button type="submit" name="state" th:value=${readVo.uid}>해제</button>
+                        </td>
+                        <td width=50 th:if="${readVo.important} == false">
+                            <button type="submit" name="state" th:value=${readVo.uid}>설정</button>
+                        </td>
+                        <td width=100 th:if="${readVo.read} == true" th:text="읽 음"></td>
+                        <td width=100 th:if="${readVo.read} == false" th:text="안읽음"></td>
+                        <td width=200 th:text="${readVo.fromname}"></td>
+                        <td width=150 th:text="${readVo.folder}"><input type="hidden" name="folder" th:value="${readVo.folder}"/></td>
+                        <td width="70"><p th:if="${readVo.body} != null">첨부)</p></td>
+                        <td width=500><a th:href="@{'/mail/' + ${readVo.uid}}" th:text="${readVo.subject}"></a></td>
+                        <td width=200 th:text="${readVo.sentDate}"></td>
+                        <td width=150 th:text="${readVo.capacity}"></td>
+                    </tr>
+                </table>
+            </div>
+            <input type="hidden" name="mode" th:value=${mode}>
+
+        </form>
+    </div>
+    <div class="content" th:if="${mode} == 'INBOX'">
+        <form th:action="@{/mail}" method="post">
+            <p>
+                <input type="checkbox" value="select_all" onclick="selectAll(this)">전체 선택
+                <button type="submit" class="submit" name="delete" onclick="return confirm('삭제하시겠습니까?')" th:value="삭제">삭제</button>
+
+                <select name="target">
+                    <option value="INBOX">받은 메일함</option>
+                    <option value="SENT">보낸 메일함</option>
+                    <option value="SPAM">스팸 메일함</option>
+                    <option value="WASTE">휴지통</option>
+                </select>
+
+                <button type="submit" class="submit" name="move" th:value="이동">이동</button>
+
+                <button type="submit" class="submit" name="read" th:value="읽음">읽음</button>
+
+                <button type="button" onclick='getCheckboxValue("reply")'>답장</button>
+
+                <button type="button" onclick='getCheckboxValue("forward")'>전달</button>
+            </p>
+
+            <script type="text/javascript">
+                function selectAll(selectAll) {
+                    const checkboxes
+                        = document.querySelectorAll('input[type="checkbox"]');
+
+                    checkboxes.forEach((checkbox) => {
+                        checkbox.checked = selectAll.checked
+                    })
+                }
+
+                function getCheckboxValue(val){
+                    const selected = document.querySelectorAll('input[name="uid"]:checked');
+
+                    if (selected.length>1){
+                        alert("하나의 항목만 체크 가능합니다.")
+                    } else if(1 > selected.length){
+                        alert("선택된 항목이 없습니다.")
+                    } else {
+                        let result = '';
+                        if (val === "reply") {
+                            selected.forEach((check) => {
+                                result = '/mail/send/reply/' + check.value;
+                            });
+                        } else if(val === "forward"){
+                            selected.forEach((check) => {
+                                result = '/mail/send/forward/' + check.value;
+                            });
+                        }
+
+                        // document.getElementsByName('reply').innerText = result;
+
+                        location.href = result;
+                    }
+                }
+            </script>
+
+            <div class="mail-content">
+                <table th:each="readVo : ${readVo}">
+                    <tr th:align="left">
+                        <td>
+                            <input type="checkbox" name="uid" th:value="${readVo.uid}"/>
+                            <input type="hidden" name="folder" th:value="${readVo.folder}"/>
+                        </td>
+
+                        <td width=150 th:if="${readVo.important} == true">
+                            <button type="submit" name="state" th:value=${readVo.uid}>해제</button>
+                        </td>
+
+                        <td width=150 th:if="${readVo.important} == false">
+                            <button type="submit" name="state" th:value=${readVo.uid}>설정</button>
+                        </td>
+
+                        <td width=80 th:if="${readVo.read} == true" th:text="읽음"></td>
+                        <td width=80 th:if="${readVo.read} == false" th:text="안읽음"></td>
+                        <td width=200 th:text="${readVo.fromname}"></td>
+                        <td width="100" th:if="${readVo.body} != null"><p>첨부)</p></td>
+                        <td width=500><a th:href="@{'/mail/' + ${readVo.uid}}" th:text="${readVo.subject}"></a></td>
+                        <td width=200 th:text="${readVo.sentDate}"></td>
+                        <td width=150 th:text="${readVo.capacity}"></td>
+                    </tr>
+                </table>
+            </div>
+
+            <input type="hidden" name="mode" th:value=${mode}>
+        </form>
+    </div>
+    <div class="content" th:if="${mode} == 'notread'">
+        <form th:action="@{/mail}" method="post">
+            <p><input type="checkbox" value="select_all" onclick="selectAll(this)">전체 선택
+                <button type="submit" class="submit" name="delete" onclick="return confirm('삭제하시겠습니까?')" th:value="삭제">삭제</button>
+                <select name="target">
+                    <option value="INBOX">받은 메일함</option>
+                    <option value="SENT">보낸 메일함</option>
+                    <option value="SPAM">스팸 메일함</option>
+                    <option value="WASTE">휴지통</option>
+                </select>
+
+                <button type="submit" class="submit" name="move" th:value="이동">이동</button>
+                <button type="submit" class="submit" name="read" th:value="읽음">읽음</button>
+
+                <button type="button" onclick='getCheckboxValue("reply")'>답장</button>
+
+                <button type="button" onclick='getCheckboxValue("forward")'>전달</button>
+            </p>
+
+            <script type="text/javascript">
+                function selectAll(selectAll) {
+                    const checkboxes
+                        = document.querySelectorAll('input[type="checkbox"]');
+
+                    checkboxes.forEach((checkbox) => {
+                        checkbox.checked = selectAll.checked
+                    })
+                }
+
+                function getCheckboxValue(val){
+                    const selected = document.querySelectorAll('input[name="uid"]:checked');
+
+                    if (selected.length>1){
+                        alert("하나의 항목만 체크 가능합니다.")
+                    } else if(1 > selected.length){
+                        alert("선택된 항목이 없습니다.")
+                    } else {
+                        let result = '';
+                        if (val === "reply") {
+                            selected.forEach((check) => {
+                                result = '/mail/send/reply/' + check.value;
+                            });
+                        } else if(val === "forward"){
+                            selected.forEach((check) => {
+                                result = '/mail/send/forward/' + check.value;
+                            });
+                        }
+
+                        location.href = result;
+                    }
+                }
+            </script>
+
+            <div class="mail-content">
+                <table th:each="readVo : ${readVo}">
+                    <tr th:align="left">
+                        <td>
+                            <input type="checkbox" name="uid" th:value="${readVo.uid}"/>
+                            <input type="hidden" name="folder" th:value="${readVo.folder}"/>
+                        </td>
+                        <td width=200 th:if="${readVo.important} == true">
+                            <button type="submit" name="state" th:value=${readVo.uid}>해제</button>
+                        </td>
+                        <td width=200 th:if="${readVo.important} == false">
+                            <button type="submit" name="state" th:value=${readVo.uid}>설정</button>
+                        </td>
+                        <td width=100 th:if="${readVo.read} == true" th:text="읽음"></td>
+                        <td width=100 th:if="${readVo.read} == false" th:text="안읽음"></td>
+                        <td width=200 th:text="${readVo.fromname}"></td>
+                        <td width="100" th:if="${readVo.body} != null"><p>첨부)</p></td>
+                        <td width=500><a th:href="@{'/mail/' + ${readVo.uid}}" th:text="${readVo.subject}"></a></td>
+                        <td width=200 th:text="${readVo.sentDate}"></td>
+                        <td width=150 th:text="${readVo.capacity}"></td>
+                    </tr>
+                </table>
+            </div>
+            <input type="hidden" name="mode" th:value=${mode}>
+        </form>
+    </div>
+    <div class="content" th:if="${mode} == 'SENT'">
+        <form th:action="@{/mail}" method="post">
+            <p><input type="checkbox" value="select_all" onclick="selectAll(this)">전체 선택
+                <button type="submit" class="submit" name="delete" onclick="return confirm('삭제하시겠습니까?')" th:value="삭제">삭제</button>
+                <input type="hidden" name="folder" value="${readVo.folder}"/>
+
+                <select name="target">
+                    <option value="INBOX">받은 메일함</option>
+                    <option value="SENT">보낸 메일함</option>
+                    <option value="SPAM">스팸 메일함</option>
+                    <option value="WASTE">휴지통</option>
+                </select>
+
+                <button type="submit" class="submit" name="move" th:value="이동">이동</button>
+
+                <button type="submit" class="submit" name="read" th:value="읽음">읽음</button>
+
+                <button type="button" onclick='getCheckboxValue("reply")'>답장</button>
+
+                <button type="button" onclick='getCheckboxValue("forward")'>전달</button>
+            </p>
+
+            <script type="text/javascript">
+                function selectAll(selectAll) {
+                    const checkboxes
+                        = document.querySelectorAll('input[type="checkbox"]');
+
+                    checkboxes.forEach((checkbox) => {
+                        checkbox.checked = selectAll.checked
+                    })
+                }
+
+                function getCheckboxValue(val){
+                    const selected = document.querySelectorAll('input[name="uid"]:checked');
+
+                    if (selected.length>1){
+                        alert("하나의 항목만 체크 가능합니다.")
+                    } else if(1 > selected.length){
+                        alert("선택된 항목이 없습니다.")
+                    } else {
+                        let result = '';
+                        if (val === "reply") {
+                            selected.forEach((check) => {
+                                result = '/mail/send/reply/' + check.value;
+                            });
+                        } else if(val === "forward"){
+                            selected.forEach((check) => {
+                                result = '/mail/send/forward/' + check.value;
+                            });
+                        }
+
+                        location.href = result;
+                    }
+                }
+            </script>
+
+            <div class="mail-content">
+                <table th:each="readVo : ${readVo}">
+                    <tr th:align="left">
+                        <td>
+                            <input type="checkbox" name="uid" th:value="${readVo.uid}"/>
+                            <input type="hidden" name="folder" th:value="${readVo.folder}"/>
+                        </td>
+                        <td width=200 th:if="${readVo.important} == true">
+                            <button type="submit" name="state" th:value=${readVo.uid}>해제</button>
+                        </td>
+                        <td width=200 th:if="${readVo.important} == false">
+                            <button type="submit" name="state" th:value=${readVo.uid}>설정</button>
+                        </td>
+                        <td width=100 th:if="${readVo.read} == true" th:text="읽음"></td>
+                        <td width=100 th:if="${readVo.read} == false" th:text="안읽음"></td>
+                        <td width=200 th:text="${readVo.toname}"></td>
+                        <td width="50" th:if="${readVo.body} == null">     </td>
+                        <td width="50" th:if="${readVo.body} != null">첨부)</td>
+                        <td width=400><a th:href="@{'/mail/' + ${readVo.uid}}" th:text="${readVo.subject}"></a></td>
+                        <td width=200 th:text="${readVo.sentDate}"></td>
+                        <td width=150 th:text="${readVo.capacity}"></td>
+                    </tr>
+                </table>
+            </div>
+            <input type="hidden" name="mode" th:value=${mode}>
+
+        </form>
+    </div>
+    <div class="content" th:if="${mode} == 'WASTE'">
+        <form th:action="@{/mail}" method="post">
+            <p><input type="checkbox" value="select_all" onclick="selectAll(this)">전체 선택
+                <button type="submit" class="submit" name="delete" onclick="return confirm('삭제하시겠습니까?')" th:value="삭제">삭제 </button>
+                <select name="target">
+                    <option value="INBOX">받은 메일함</option>
+                    <option value="SENT">보낸 메일함</option>
+                    <option value="SPAM">스팸 메일함</option>
+                    <option value="WASTE">휴지통</option>
+                </select>
+
+                <button type="submit" class="submit" name="move" th:value="이동">이동</button>
+
+                <button type="submit" class="submit" name="read" th:value="읽음">읽음</button>
+            </p>
+
+            <script type="text/javascript">
+                function selectAll(selectAll) {
+                    const checkboxes
+                        = document.querySelectorAll('input[type="checkbox"]');
+
+                    checkboxes.forEach((checkbox) => {
+                        checkbox.checked = selectAll.checked
+                    })
+                }
+            </script>
+
+            <div class="mail-content">
+                <table th:each="readVo : ${readVo}">
+                    <tr th:align="left">
+                        <td><input type="checkbox" name="uid" th:value="${readVo.uid}"/></td>
+                        <td width=200 th:if="${readVo.important} == true">
+                            <button type="submit" name="state" th:value=${readVo.uid}>해제</button>
+                        </td>
+                        <td width=200 th:if="${readVo.important} == false">
+                            <button type="submit" name="state" th:value=${readVo.uid}>설정</button>
+                        </td>
+                        <td width=100 th:if="${readVo.read} == true" th:text="읽음"></td>
+                        <td width=100 th:if="${readVo.read} == false" th:text="안읽음"></td>
+                        <td width=200 th:text="${readVo.fromname}"></td>
+                        <td width=200 th:text="${readVo.folder}"><input type="hidden" name="folder" th:value="${readVo.folder}"/></td>
+                        <td width=700><p th:if="${readVo.body} != null">&lt;첨부></p><a th:href="@{'/mail/' + ${readVo.uid}}" th:text="${readVo.subject}"></a></td>
+                        <td width=200 th:text="${readVo.sentDate}"></td>
+                        <td width=150 th:text="${readVo.capacity}"></td>
+                    </tr>
+                </table>
+            </div>
+            <input type="hidden" name="mode" th:value=${mode}>
+
+        </form>
+    </div>
+    <div class="content" th:if="${mode} == 'send'">
+        <form th:action="@{/mail/send}" method="post" enctype="multipart/form-data">
+            <div>
+                <input th:if="${uid} != null" type="hidden" name="uid" th:value="${uid}"/>
+                <input th:if="${reply} != null" type="hidden" name="reply" th:value="${reply}"/>
+                <p>
+                    <label>받는 사람</label>
+                    <label>
+                        <input th:if="${readVo.fromaddress} != null" type="text" name="To" th:value="${readVo.fromaddress}">
+                        <input th:unless="${readVo.fromaddress} != null" type="text" name="To" th:value="${To}">
+                    </label>
+                </p>
+                <p>
+                    <label>참조</label>
+                    <label>
+                        <input th:if="${readVo.cc} != null" type="text" name="CC" th:value="${CC}" th:text="${readVo.cc}">
+                        <input th:unless="${readVo.cc} != null" type="text" name="CC" th:value="${CC}">
+<!--                        <input type="text" name="CC" th:value="${CC}">-->
+                    </label>
+                </p>
+                <p>
+                    <label>숨은 참조</label>
+                    <label>
+                        <input th:if="${readVo.bcc} != null" type="text" name="BCC" th:value="${BCC}" th:text="${readVo.bcc}">
+                        <input th:unless="${readVo.bcc} != null" type="text" name="BCC" th:value="${BCC}">
+<!--                        <input type="text" name="BCC" th:value="${BCC}">-->
+                    </label>
+                </p>
+                <input id="files-upload" type="file" name="file" multiple="multiple">
+
+                <ul id="file-list">
+                    <li class="no-items">(파일이 선택되지 않음)</li>
+                </ul>
+
+                <script type="text/javascript">
+                    var filesUpload = document.getElementById("files-upload"),
+                        fileList = document.getElementById("file-list");
+
+                    function traverseFiles (files) {
+                        var li,
+                            file,
+                            fileInfo;
+                        fileList.innerHTML = "";
+
+                        var mylist = "";
+                        for (var i=0; files.length > i; i++) {
+
+                            li = document.createElement("li");
+                            file = files[i];
+                            mylist = mylist + file.name + ",";
+                            fileInfo = "<div><strong> " + i + " </strong> || 파일 이름: "
+                                + file.name;
+                            fileInfo += " || 용량:"
+                                + file.size + " bytes</>";
+                            li.innerHTML = fileInfo;
+                            fileList.appendChild(li);
+                        }
+
+                        // document.getElementById("files-upload").setAttribute("value", mylist);
+                    }
+
+                    filesUpload.onchange = function () {
+                        traverseFiles(this.files);
+                    };
+                </script>
+
+                <p>
+                    <label>메일 제목</label>
+                    <label>
+                        <input th:if="${readVo.subject} != null" type="text" name="Subject" th:value="${readVo.subject}">
+                        <input th:unless="${readVo.subject} != null" type="text" name="Subject" th:value="${Sub}">
+
+<!--                        <input type="text" name="Subject" th:value="${Sub}">-->
+                    </label>
+                </p>
+                <label for="ir1"></label>
+                <textarea th:if="${readVo.body2} != null" type="text" name="Text" id="ir1" rows="10" cols="100" th:utext="${readVo.body2}" th:value="${Body}"></textarea>
+
+                <label for="ir2"></label>
+
+                <textarea th:unless="${readVo.body2} != null" name="Text" id="ir2" rows="10" cols="100" th:text="${Body}" th:value="${Body}"></textarea>
+
+                <p>
+                    <input type="submit" class="submit" name="mode" onclick="return confirm('메일을 발송하시겠습니까?')"
+                           th:value="send">
+                    <button th:onclick="'location.href = \'/mail\''" name="mode" th:value="cancel">취소</button>
+                    <input type="submit" class="submit" name="mode" onclick="return confirm('현재 메일을 임시보관함에 저장합니다.')"
+                           th:value="save">
+                </p>
+            </div>
+        </form>
+    </div>
+    <div class="content" th:if="${mode} == 'TEMPORARY'">
+        <form th:action="@{/mail}" method="post">
+            <p><input type="checkbox" value="select_all" onclick="selectAll(this)">전체 선택
+                <button type="submit" class="submit" name="delete" onclick="return confirm('삭제하시겠습니까?')" th:value="삭제">삭제</button>
+                <input type="hidden" name="folder" value="${readVo.folder}"/>
+
+                <!--<select name="target">
+                    <option value="INBOX">받은 메일함</option>
+                    <option value="SENT">보낸 메일함</option>
+                    <option value="SPAM">스팸 메일함</option>
+                    <option value="WASTE">휴지통</option>
+                </select>
+
+                <button type="submit" class="submit" name="move" th:value="이동">이동</button>-->
+                <button type="button" onclick='getCheckboxValue("forward")'>전달</button>
+            </p>
+
+            <script type="text/javascript">
+                function selectAll(selectAll) {
+                    const checkboxes
+                        = document.querySelectorAll('input[type="checkbox"]');
+
+                    checkboxes.forEach((checkbox) => {
+                        checkbox.checked = selectAll.checked
+                    })
+                }
+
+                function getCheckboxValue(val){
+                    const selected = document.querySelectorAll('input[name="uid"]:checked');
+
+                    if (selected.length>1){
+                        alert("하나의 항목만 체크 가능합니다.")
+                    } else if(1 > selected.length){
+                        alert("선택된 항목이 없습니다.")
+                    } else {
+                        let result = '';
+                        if (val === "reply") {
+                            selected.forEach((check) => {
+                                result = '/mail/send/reply/' + check.value;
+                            });
+                        } else if(val === "forward"){
+                            selected.forEach((check) => {
+                                result = '/mail/send/forward/' + check.value;
+                            });
+                        }
+
+                        location.href = result;
+                    }
+                }
+            </script>
+
+            <div class="mail-content">
+                <table th:each="readVo : ${readVo}">
+                    <tr th:align="left">
+                        <td>
+                            <input type="checkbox" name="uid" th:value="${readVo.uid}"/>
+                            <input type="hidden" name="folder" th:value="${readVo.folder}"/>
+                        </td>
+                        <td width=200 th:if="${readVo.important} == true">
+                            <button type="submit" name="state" th:value=${readVo.uid}>해제</button>
+                        </td>
+                        <td width=200 th:if="${readVo.important} == false">
+                            <button type="submit" name="state" th:value=${readVo.uid}>설정</button>
+                        </td>
+                        <td width=100 th:if="${readVo.read} == true" th:text="읽음"></td>
+                        <td width=100 th:if="${readVo.read} == false" th:text="안읽음"></td>
+                        <td width=200 th:text="${readVo.to}"></td>
+                        <td width="100" th:if="${readVo.body} != null"><p>첨부)</p></td>
+                        <td width="100" th:if="${readVo.body} != null"><p>첨부)</p></td>
+                        <td width=500><a th:href="@{'/mail/' + ${readVo.uid}}" th:text="${readVo.subject}"></a></td>
+                        <td width=200 th:text="${readVo.sentDate}"></td>
+                        <td width=150 th:text="${readVo.capacity}"></td>
+                    </tr>
+                </table>
+            </div>
+            <input type="hidden" name="mode" th:value=${mode}>
+
+        </form>
+
+    </div>
+    <div class="content" th:if="${mode} == 'IMPORTANT'">
+        <form th:action="@{/mail}" method="post">
+            <p><input type="checkbox" value="select_all" onclick="selectAll(this)">전체 선택
+                <button type="submit" class="submit" name="delete" onclick="return confirm('삭제하시겠습니까?')" th:value="삭제">삭제</button>
+                <input type="hidden" name="folder" value="${readVo.folder}"/>
+
+                <select name="target">
+                    <option value="INBOX">받은 메일함</option>
+                    <option value="SENT">보낸 메일함</option>
+                    <option value="SPAM">스팸 메일함</option>
+                    <option value="WASTE">휴지통</option>
+                </select>
+
+                <button type="submit" class="submit" name="move" th:value="이동">이동</button>
+
+                <button type="submit" class="submit" name="read" th:value="읽음">읽음</button>
+
+                <button type="button" onclick='getCheckboxValue("reply")'>답장</button>
+
+                <button type="button" onclick='getCheckboxValue("forward")'>전달</button>
+
+                <button type="button" onclick='getCheckboxValue("forward")'>삭제</button>
+
+                <button type="button" onclick='getCheckboxValue("forward")'>이동</button>
+
+            </p>
+
+            <script type="text/javascript">
+                function selectAll(selectAll) {
+                    const checkboxes
+                        = document.querySelectorAll('input[type="checkbox"]');
+
+                    checkboxes.forEach((checkbox) => {
+                        checkbox.checked = selectAll.checked
+                    })
+                }
+
+                function getCheckboxValue(val){
+                    const selected = document.querySelectorAll('input[name="uid"]:checked');
+
+                    if (selected.length>1){
+                        alert("하나의 항목만 체크 가능합니다.")
+                    } else if(1 > selected.length){
+                        alert("선택된 항목이 없습니다.")
+                    } else {
+                        let result = '';
+                        if (val === "reply") {
+                            selected.forEach((check) => {
+                                result = '/mail/send/reply/' + check.value;
+                            });
+                        } else if(val === "forward"){
+                            selected.forEach((check) => {
+                                result = '/mail/send/forward/' + check.value;
+                            });
+                        }
+
+                        location.href = result;
+                    }
+                }
+            </script>
+
+            <div class="mail-content">
+                <table th:each="readVo : ${readVo}">
+                    <tr th:align="left">
+                        <td><input type="checkbox" name="uid" th:value="${readVo.uid}"/></td>
+                        <td width=200 th:if="${readVo.important} == true">
+                            <button type="submit" name="state" th:value=${readVo.uid}>해제</button>
+                        </td>
+                        <td width=200 th:if="${readVo.important} == false">
+                            <button type="submit" name="state" th:value=${readVo.uid}>설정</button>
+                        </td>
+                        <td width=100 th:if="${readVo.read} == true">
+                            <p>읽음<p>
+                        </td>
+                        <td width=100 th:if="${readVo.read} == false">
+                            <p>안읽음<p>
+                        </td>
+                        <td width=200 th:text="${readVo.toname}"></td>
+                        <td width=150 th:text="${readVo.folder}"><input type="hidden" name="folder" th:value="${readVo.folder}"/></td>
+                        <td width="100" th:if="${readVo.body} != null"><p>첨부)</p></td>
+                        <td width=500><a th:href="@{'/mail/' + ${readVo.uid}}" th:text="${readVo.subject}"></a></td>
+                        <td width=200 th:text="${readVo.sentDate}"></td>
+                        <td width=150 th:text="${readVo.capacity}"></td>
+                    </tr>
+                </table>
+            </div>
+            <input type="hidden" name="mode" th:value=${mode}>
+
+        </form>
+
+    </div>
+    <div class="content" th:if="${mode} == 'SPAM'">
+        <form th:action="@{/mail}" method="post">
+            <p><input type="checkbox" value="select_all" onclick="selectAll(this)">전체 선택
+                <button type="submit" class="submit" name="delete" onclick="return confirm('삭제하시겠습니까?')" th:value="삭제">삭제</button>
+                <input type="hidden" name="folder" value="${readVo.folder}"/>
+
+                <select name="target">
+                    <option value="INBOX">받은 메일함</option>
+                    <option value="SENT">보낸 메일함</option>
+                    <option value="SPAM">스팸 메일함</option>
+                    <option value="WASTE">휴지통</option>
+                </select>
+
+                <button type="submit" class="submit" name="move" th:value="이동" >이동</button>
+
+                <button type="submit" class="submit" name="read" th:value="읽음">읽음</button>
+
+            </p>
+
+            <script type="text/javascript">
+                function selectAll(selectAll) {
+                    const checkboxes
+                        = document.querySelectorAll('input[type="checkbox"]');
+
+                    checkboxes.forEach((checkbox) => {
+                        checkbox.checked = selectAll.checked
+                    })
+                }
+            </script>
+
+            <div class="mail-content">
+                <table th:each="readVo : ${readVo}">
+                    <tr th:align="left">
+                        <td>
+                            <input type="checkbox" name="uid" th:value="${readVo.uid}"/>
+                            <input type="hidden" name="folder" th:value="${readVo.folder}"/>
+                        </td>
+                        <td width=200 th:if="${readVo.important} == true">
+                            <button type="submit" name="state" th:value=${readVo.uid}>해제</button>
+                        </td>
+                        <td width=200 th:if="${readVo.important} == false">
+                            <button type="submit" name="state" th:value=${readVo.uid}>설정</button>
+                        </td>
+                        <td width=100 th:if="${readVo.read} == true" th:text="읽음"></td>
+                        <td width=100 th:if="${readVo.read} == false" th:text="안읽음"></td>
+                        <td width=200 th:text="${readVo.fromname}"></td>
+                        <td width="100" th:if="${readVo.body} != null"><p>첨부)</p></td>
+                        <td width=500><a th:href="@{'/mail/' + ${readVo.uid}}" th:text="${readVo.subject}"></a></td>
+                        <td width=200 th:text="${readVo.sentDate}"></td>
+                        <td width=150 th:text="${readVo.capacity}"></td>
+
+                    </tr>
+                </table>
+
+            </div>
+            <input type="hidden" name="mode" th:value=${mode}>
+
+        </form>
+    </div>
+    <div class="content" th:if="${mode} == 'readmail'">
+        <script>
+            var pop;
+            function popupOpen(url){
+                pop = window.open(url);
+
+                close();
+            }
+            function close(){
+                pop.close();
+            }
+        </script>
+
+        <div>
+            <p>
+                <form th:action="@{/mail}" method="post">
+
+                    <input type="hidden" name="uid" th:value="${readVo.uid}"/>
+
+                    <button type="button" onclick='getCheckboxValue("reply")'>답장</button>
+
+                    <button type="button" onclick='getCheckboxValue("forward")'>전달</button>
+
+                    <select name="target">
+                        <option value="INBOX">받은 메일함</option>
+                        <option value="SENT">보낸 메일함</option>
+                        <option value="SPAM">스팸 메일함</option>
+                        <option value="WASTE">휴지통</option>
+                    </select>
+                    <button type="submit" class="submit" name="move" th:value="이동">이동</button>
+
+                    <button type="submit" class="submit" name="delete" onclick="return confirm('삭제하시겠습니까?')" th:value="삭제">삭제</button>
+
+                </form>
+            </p>
+
+            <script type="text/javascript">
+                function getCheckboxValue(val){
+                    const uid = document.getElementsByName("uid")
+
+                    if (val === "reply") {
+                        location.href = '/mail/send/reply/' + uid[0].value;
+                    } else if(val === "forward"){
+                        location.href = '/mail/send/forward/' + uid[0].value;
+                    }
+                }
+            </script>
+
+            <table width="70%" border="1">
+                <tr>
+                    <td style="font-weight: bold" align="center" width="150">보낸 사람</td>
+                    <td th:text="${readVo.from}"></td>
+                </tr>
+
+                <tr>
+                    <td style="font-weight: bold" align="center">받는 사람</td>
+                    <td th:text="${readVo.toaddress}"></td>
+                </tr>
+
+                <tr th:if="${readVo.cc} != null">
+                    <td style="font-weight: bold" align="center">참조</td>
+                    <td th:text="${readVo.cc}"></td>
+                </tr>
+
+                <tr style="font-weight: bold" th:if="${readVo.bcc} != null">
+                    <td style="font-weight: bold" align="center">숨은 참조</td>
+                    <td th:text="${readVo.bcc}"></td>
+                </tr>
+
+                <tr>
+                    <td style="font-weight: bold" align="center">받은 날짜</td>
+                    <td th:text="${readVo.sentDate}"></td>
+                </tr>
+
+                <tr>
+                    <td style="font-weight: bold" align="center">제목</td>
+                    <td th:text="${readVo.subject}"></td>
+                </tr>
+
+                <tr th:if="${readVo.body} != null" >
+                    <td style="font-weight: bold" align="center">첨부파일 목록</td>
+                    <td>
+                        <p th:each="attachFilename, index : ${readVo.body}">
+                        <a th:if="${attachFilename} != null" th:href="@{'/downloadattach/' + ${readVo.uid} + '&attachIndex=' + ${index.index}}" th:text="${index.index} + ' : '+ ${attachFilename}"></a>
+                    </p>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td colspan="2"><p th:utext="${readVo.body2}"></p></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
