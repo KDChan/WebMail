@@ -11,11 +11,11 @@
 4. html
 5. java script
 6. mysql
-7. hmailserver (window mail server)
+
 
 ## 개발 환경
 
-- 서버 환경 - hmailserver (윈도우 메일서버), mysql
+- 서버 환경 - window server 2020, hmailserver (윈도우 메일서버), mysql
 - 메인 환경 - intellij
 
 ## 프로젝트 목표
